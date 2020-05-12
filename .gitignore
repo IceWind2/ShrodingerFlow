@@ -1,0 +1,5 @@
+/.vs
+/source/bin
+/source/obj
+.editorconfig
+/packages
