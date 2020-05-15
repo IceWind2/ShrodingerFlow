@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace source.assets.utils
+namespace source.assets.Discrete_space.utils
 {
     public static class Matlab
     {

@@ -80,10 +80,14 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="assets\utils\FFT.cs" />
-    <Compile Include="assets\ISF.cs" />
-    <Compile Include="assets\Particles.cs" />
-    <Compile Include="assets\utils\Matlab.cs" />
+    <Compile Include="assets\CudafyFunctions.cs" />
+    <Compile Include="assets\Discrete_space\utils\FFT.cs" />
+    <Compile Include="assets\Discrete_space\ISF.cs" />
+    <Compile Include="assets\Particles\Particles.cs" />
+    <Compile Include="assets\Discrete_space\utils\Matlab.cs" />
+    <Compile Include="assets\Particles\utils\Handler.cs" />
+    <Compile Include="assets\Particles\utils\UpdateHandler.cs" />
+    <Compile Include="assets\Particles\utils\VelocityHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

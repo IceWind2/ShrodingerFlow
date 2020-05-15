@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-using source.assets.utils;
+using source.assets.Discrete_space.utils;
 
-namespace source.assets
+namespace source.assets.Discrete_space
 {
     public class ISF
     {
@@ -109,24 +109,25 @@ namespace source.assets
 
         public void schroedinger_flow(Complex[,,] psi1, Complex[,,] psi2)
         {
-            var dim = new List<int> { psi1.GetLength(0), psi1.GetLength(1), psi1.GetLength(2) };
-            var tmp1 = _gpu.CopyToDevice(psi1);
+            int[] dim = new int[3] { psi1.GetLength(0), psi1.GetLength(1), psi1.GetLength(2) };
+
+            /*var tmp1 = _gpu.CopyToDevice(psi1);
             var tmp2 = _gpu.CopyToDevice(psi2);
 
-            FFT.fft_c(tmp1, tmp1, false);
-            FFT.fft_c(tmp2, tmp2, false);
+            FFT.fft_c(tmp1, tmp1, dim, false);
+            FFT.fft_c(tmp2, tmp2, dim, false);
 
-            FFT.shift(tmp1);
-            FFT.shift(tmp2);
+            FFT.shift(tmp1, dim);
+            FFT.shift(tmp2, dim);
 
-            FFT.mul_each(tmp1, mask);
-            FFT.mul_each(tmp2, mask);
+            FFT.mul_each(tmp1, mask, dim);
+            FFT.mul_each(tmp2, mask, dim);
 
-            FFT.shift(tmp1);
-            FFT.shift(tmp2);
+            FFT.shift(tmp1, dim);
+            FFT.shift(tmp2, dim);
 
-            FFT.fft_c(tmp1, tmp1, true);
-            FFT.fft_c(tmp2, tmp2, true);
+            FFT.fft_c(tmp1, tmp1, dim, true);
+            FFT.fft_c(tmp2, tmp2, dim, true);*/
         }
 
         // For a 1-form v compute the corresponding vector field `v^sharp` as a staggered vector field living on edges
@@ -257,11 +258,27 @@ namespace source.assets
         // Распределение Пуассона
         public Complex[,,] PoissonSolve(float[,,] f)
         {
+            int[] dim = new int[3] { f.GetLength(0), f.GetLength(1), f.GetLength(2) };
+
+            Complex[,,] fc = new Complex[dim[0], dim[1], dim[2]];
+
+            for (int i = 0; i < dim[0]; i++)
+            {
+                for (int j = 0; j < dim[1]; j++)
+                {
+                    for (int k = 0; k < dim[2]; k++)
+                    {
+                        fc[i, j, k] = 1;
+                    }
+                }
+            }
+
+            return fc;
+
             var d_f = _gpu.CopyToDevice(f);
-            Complex[,,] fc = new Complex[f.GetLength(0), f.GetLength(1), f.GetLength(2)];
             var d_fc = _gpu.CopyToDevice(fc);
 
-            FFT.fft_r(d_f, d_fc, false);
+            FFT.fft_r(d_f, d_fc, dim, false);
 
 
             var sx = iix.Select3D((e, i, j, k) => Math.Sin(Math.PI * (e - 1) / resx) / dx);
@@ -275,9 +292,9 @@ namespace source.assets
             fac[0, 0, 0] = 0;
             Complex[,,] d_fac = _gpu.CopyToDevice(fac);
 
-            FFT.mul_each(d_fc, d_fac);
+            FFT.mul_each(d_fc, d_fac, dim);
 
-            FFT.fft_c(d_fc, d_fc, true);
+            FFT.fft_c(d_fc, d_fc, dim, true);
 
             _gpu.CopyFromDevice(fc, d_fc);
             return fc;
