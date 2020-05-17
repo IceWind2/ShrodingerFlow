@@ -1,7 +1,7 @@
 extern "C" __global__ void
 update_velocities(const float* x, const float* y, const float* z, 
                   const float* shiftX, const float* shiftY, const float* shiftZ, const float* fact, 
-                  const float** vx, const float** vy, const float** vz, 
+                  float*** vx, float*** vy, float*** vz, 
                   float* _ux, float* _uy, float* _uz, 
                   int* tor_size, int* tor_res, float* tor_d)
         {
