@@ -1,13 +1,10 @@
-﻿using Cudafy;
-using Cudafy.Host;
-using Cudafy.Translator;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace source.assets.Discrete_space.utils
 {
     static class FFT
     {
-        private static GPGPU _GPU;
+       /* private static GPGPU _GPU;
         private static Cudafy.Maths.FFT.GPGPUFFT _fftGPU;
 
         public static void configure(GPGPU gpu)
@@ -82,6 +79,6 @@ namespace source.assets.Discrete_space.utils
             Complex tmp = x[i, j, k];
             x[i, j, k] = x[i + iStep, j + jStep, k + kStep];
             x[i + iStep, j + jStep, k + kStep] = tmp;
-        }
+        }*/
     }
 }

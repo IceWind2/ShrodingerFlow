@@ -1,7 +1,7 @@
 ﻿using System;
-using Cudafy;
-using Cudafy.Host;
-using Cudafy.Translator;
+using ManagedCuda;
+using ManagedCuda.VectorTypes;
+using source.assets.CUDA_kernels;
 
 namespace source.assets.Particles.utils
 {
@@ -12,7 +12,14 @@ namespace source.assets.Particles.utils
     }
 
     public class UpdateHandler : Handler
-    { 
+    {
+        private static CudaKernel _gpu; 
+        
+        public new static void init()
+        {
+            _gpu = KernelLoader.load_kernel("add_particles");
+        }
+        
         public static RandomCoordinates create_random(int cnt)
         {
             Random rnd = new Random();
@@ -28,17 +35,17 @@ namespace source.assets.Particles.utils
 
         public static void update_particles(float[] xx, float[] yy, float[] zz, int cnt, int size)
         {
-            float[] d_xx = _gpu.CopyToDevice(xx);
-            float[] d_yy = _gpu.CopyToDevice(yy);
-            float[] d_zz = _gpu.CopyToDevice(zz);
-            int[] d_size = _gpu.CopyToDevice(new int[1] { size });
+            CudaDeviceVariable<float> d_xx = xx;
+            CudaDeviceVariable<float> d_yy = yy;
+            CudaDeviceVariable<float> d_zz = zz;
 
-            _gpu.Launch(cnt, 1, "add", x, y, z, d_xx, d_yy, d_zz, d_size);
-
-            _gpu.Free(d_xx);
-            _gpu.Free(d_yy);
-            _gpu.Free(d_zz);
-            _gpu.Free(d_size);
+            _gpu.BlockDimensions = new dim3(1, 1, 1);
+            _gpu.GridDimensions = new dim3(cnt, 1, 1);
+            _gpu.Run(x, y, z, d_xx, d_yy, d_zz, size);
+            
+            d_xx.Dispose();
+            d_yy.Dispose();
+            d_zz.Dispose();
         }
     }
 }

@@ -1,20 +1,15 @@
-﻿using Cudafy;
-using Cudafy.Host;
-using Cudafy.Translator;
-using Cudafy.Maths;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-
+using ManagedCuda;
+using ManagedCuda.VectorTypes;
 using source.assets.Discrete_space.utils;
 
 namespace source.assets.Discrete_space
 {
     public class ISF
     {
-
-        public static GPGPU _gpu;
         //private int currentResolution;
         //private ParticleSystem.Particle[] points;
 
@@ -27,21 +22,20 @@ namespace source.assets.Discrete_space
 
         public float hbar;                  // reduced Planck constant (Понижение постоянной Планка)
         public float dt;                    // time step
-        public Complex[,,] tmp_mask; // tmp_mask::Array{ Complex{ float64},3}  // Fourier coefficient for solving Schroedinger eq (Коэффициент Фурье)
-        public Complex[,,] mask;
-
+        public cuFloatComplex[,,] tmp_mask; // tmp_mask::Array{ Complex{ float64},3}  // Fourier coefficient for solving Schroedinger eq (Коэффициент Фурье)
+        //public CudaDeviceVariable<cuFloatComplex> mask;
+        
         public ISF(int[] vol_size, int[] vol_res, float _hbar, float _dt) // vol_size::NTuple{ 3}, vol_res::NTuple{3}, hbar, dt)
         {
             //obj = new()
-            FFT.configure(_gpu);
 
             sizex = vol_size[0];
             sizey = vol_size[1];
             sizez = vol_size[2]; //obj.sizex, obj.sizey, obj.sizez = vol_size
 
-            resx = (int)GMath.Round(vol_res[0]);
-            resy = (int)GMath.Round(vol_res[1]);
-            resz = (int)GMath.Round(vol_res[2]);
+            resx = vol_res[0];
+            resy = vol_res[1];
+            resz = vol_res[2];
 
             dx = sizex / (float)resx;
             dy = sizey / (float)resy;
@@ -73,9 +67,8 @@ namespace source.assets.Discrete_space
 
             hbar = _hbar;
             dt = _dt;
-            tmp_mask = new Complex[resx, resy, resz];
+            tmp_mask = new cuFloatComplex[resx, resy, resz];
             build_schroedinger();
-            mask = _gpu.CopyToDevice(tmp_mask);
         }
 
         public void build_schroedinger() //private void CreatePoints()
@@ -83,7 +76,7 @@ namespace source.assets.Discrete_space
             var nx = this.resx;
             var ny = this.resy;
             var nz = this.resz;
-            var fac = -4 * GMath.Pow(GMath.PI, 2) * this.hbar;
+            var fac = -4 * Math.Pow(Math.PI, 2) * this.hbar;
 
             float[,,] kx = new float[iix.GetLength(0), iix.GetLength(1), iix.GetLength(2)];
             float[,,] ky = new float[iiy.GetLength(0), iiy.GetLength(1), iiy.GetLength(2)];
@@ -99,7 +92,9 @@ namespace source.assets.Discrete_space
                         kx[i, j, k] = (iiz[i, j, k] - 1 - nz / 2) / sizez;
 
                         var lambda = fac * (Math.Pow(kx[i, j, k], 2) + Math.Pow(ky[i, j, k], 2) + Math.Pow(kz[i, j, k], 2));
-                        tmp_mask[i, j, k] = Complex.Exp(Complex.ImaginaryOne * lambda * dt / 2f);
+                        var tmp = Complex.Exp(Complex.ImaginaryOne * lambda * dt / 2f);
+                        tmp_mask[i, j, k] = new cuFloatComplex((float)tmp.Real, (float)tmp.Imaginary);
+                        
                     }
                 }
             }
@@ -275,7 +270,7 @@ namespace source.assets.Discrete_space
 
             return fc;
 
-            var d_f = _gpu.CopyToDevice(f);
+            /*var d_f = _gpu.CopyToDevice(f);
             var d_fc = _gpu.CopyToDevice(fc);
 
             FFT.fft_r(d_f, d_fc, dim, false);
@@ -297,7 +292,7 @@ namespace source.assets.Discrete_space
             FFT.fft_c(d_fc, d_fc, dim, true);
 
             _gpu.CopyFromDevice(fc, d_fc);
-            return fc;
+            return fc;*/
         }
 
         public class Psi

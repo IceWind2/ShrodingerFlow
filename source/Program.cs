@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Numerics;
-
-using Cudafy;
-using Cudafy.Host;
-using Cudafy.Translator;
-
+using ManagedCuda.BasicTypes;
 using source.assets.Discrete_space;
 using source.assets.Particles;
-using source.assets;
+
+using  ManagedCuda;
 
 class TestCase
 {
@@ -52,30 +49,6 @@ class TestCase
 
     static void Main(string[] args)
     {
-        CudafyModes.Target = eGPUType.OpenCL;
-        CudafyTranslator.Language = eLanguage.OpenCL;
-        CudafyModes.DeviceId = 2;
-        var gpu = CudafyHost.GetDevice(CudafyModes.Target, CudafyModes.DeviceId);
-        CudafyFunctions.load_functions(gpu);
-
-        /*Cudafy.Maths.FFT.GPGPUFFT fftGPU = Cudafy.Maths.FFT.GPGPUFFT.Create(gpu);
-        var fftPlan = fftGPU.Plan1D(Cudafy.Maths.FFT.eFFTType.Real2Complex, Cudafy.Maths.FFT.eDataType.Single, 4, 1);
-
-        var f = new float[4];
-        var a = new Complex[4];
-
-        for (int i = 0; i < 4; i++)
-        {
-            f[i] = 1;
-        }
-        var d_f = gpu.CopyToDevice(f);
-        var d_a = gpu.CopyToDevice(a);
-
-        fftGPU.Execute(fftPlan, d_f, d_a);
-        gpu.CopyFromDevice(d_a, a);
-        Console.Out.WriteLine(a[0]);
-        return;*/
-
         //PARAMETERS
         int[] vol_size = { 4, 2, 2 };   // box size
         int[] vol_res = { 64, 64, 64 }; // volume resolution
@@ -91,15 +64,14 @@ class TestCase
 
         var n_particles = 50;   // number of particles
         const int max_particles = 200;
-
+        
 
         //INITIALISATION
-        ISF._gpu = gpu;
         ISF isf = new ISF(vol_size, vol_res, hbar, dt);
         isf.hbar = hbar;
         isf.dt = dt;
 
-        Particles.init(max_particles, isf, gpu);
+        Particles.init(max_particles, isf);
 
         
 
@@ -164,18 +136,15 @@ class TestCase
             Particles.calculate_movement(vel.vx, vel.vy, vel.vz);
         }
 
-        var xx = new float[max_particles];
-        gpu.CopyFromDevice(Particles.x, xx);
-        var yy = new float[max_particles];
-        gpu.CopyFromDevice(Particles.y, yy);
-        var zz = new float[max_particles];
-        gpu.CopyFromDevice(Particles.z, zz);
+        float[] xx = Particles.x;
+        float[] yy = Particles.y;
+        float[] zz = Particles.z;
 
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < 10; i++)
         {
-             Console.Out.WriteLine(xx[i] + " " + yy[i] + " " + zz[i]);
+            Console.Out.WriteLine(xx[i] + ' ' + yy[i] + ' ' + zz[i]);
         }
-
+        
         time.Stop();
         TimeSpan ts = time.Elapsed;
         string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",

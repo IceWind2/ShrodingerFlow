@@ -1,7 +1,7 @@
 ﻿using System;
-using Cudafy;
-using Cudafy.Host;
-
+using ManagedCuda;
+using ManagedCuda.BasicTypes;
+using source.assets.CUDA_kernels;
 using source.assets.Particles.utils;
 using source.assets.Discrete_space;
 
@@ -9,24 +9,25 @@ namespace source.assets.Particles
 {
     public static class Particles
     {
-        public static float[] x, y, z;
+        public static CudaDeviceVariable<float> x, y, z;
         private static int _size, _maxCnt;
-        private static GPGPU _gpu;
 
-        public static void init(int max_particles, ISF torus, GPGPU gpu)
+        public static void init(int max_particles, ISF torus)
         {
-            _gpu = gpu;
-
-            x = gpu.Allocate<float>(max_particles);
-            y = gpu.Allocate<float>(max_particles);
-            z = gpu.Allocate<float>(max_particles);
+            KernelLoader.init();
+            
+            SizeT size = max_particles * sizeof(float);
+            x = new CudaDeviceVariable<float>(size);
+            y = new CudaDeviceVariable<float>(size);
+            z = new CudaDeviceVariable<float>(size);
 
             _size = 0;
             _maxCnt = max_particles;
-
-            Handler.set_gpu(gpu);
+            
             Handler.set_particles(x, y, z);   
 
+            UpdateHandler.init();
+            
             VelocityHandler.init(torus, _maxCnt);
         }
 
@@ -54,10 +55,5 @@ namespace source.assets.Particles
         {
             VelocityHandler.update_particles(vx, vy, vz, _size);
         }
-
-        /*public static void Keep(int[] vol_size)
-        {
-            //todo: cudafy
-        }*/
     }
 }

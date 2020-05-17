@@ -34,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
@@ -47,40 +48,18 @@
     <StartupObject>TestCase</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cloo, Version=0.9.1.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Cloo.dll</HintPath>
+    <Reference Include="ManagedCuda, Version=10.0.39.0, Culture=neutral, PublicKeyToken=242d898828717aa0">
+      <HintPath>bin\Release\ManagedCuda.dll</HintPath>
     </Reference>
-    <Reference Include="CUDA.NET, Version=4.0.7434.33165, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\CUDA.NET.dll</HintPath>
-    </Reference>
-    <Reference Include="Cudafy, Version=1.29.7434.33165, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Cudafy.dll</HintPath>
-    </Reference>
-    <Reference Include="Cudafy.Host, Version=1.29.7434.33166, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Cudafy.Host.dll</HintPath>
-    </Reference>
-    <Reference Include="Cudafy.Math, Version=1.29.7434.33173, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Cudafy.Math.dll</HintPath>
-    </Reference>
-    <Reference Include="Cudafy.NET, Version=1.29.7434.33174, Culture=neutral, PublicKeyToken=63a4c9931616906b, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Cudafy.NET.dll</HintPath>
-    </Reference>
-    <Reference Include="Cudafy.Translator, Version=1.29.7434.33166, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Cudafy.Translator.dll</HintPath>
+    <Reference Include="NVRTC, Version=10.0.39.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>bin\Release\NVRTC.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="assets\CudafyFunctions.cs" />
+    <Compile Include="assets\CUDA_kernels\KernelLoader.cs" />
     <Compile Include="assets\Discrete_space\utils\FFT.cs" />
     <Compile Include="assets\Discrete_space\ISF.cs" />
     <Compile Include="assets\Particles\Particles.cs" />
@@ -98,6 +77,10 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ClCompile Include="assets\CUDA_kernels\add_particles.cu" />
+    <ClCompile Include="assets\CUDA_kernels\update_particles.cu" />
+    <ClCompile Include="assets\CUDA_kernels\update_velocities.cu" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
