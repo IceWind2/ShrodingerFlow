@@ -4,10 +4,7 @@ namespace source.assets.Discrete_space.utils
 {
     static class FFT
     {
-       /* private static GPGPU _GPU;
-        private static Cudafy.Maths.FFT.GPGPUFFT _fftGPU;
-
-        public static void configure(GPGPU gpu)
+        /*public static void configure(GPGPU gpu)
         {
             _GPU = gpu;
 

@@ -78,9 +78,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="assets\CUDA_kernels\add_particles.cu" />
-    <ClCompile Include="assets\CUDA_kernels\update_particles.cu" />
-    <ClCompile Include="assets\CUDA_kernels\update_velocities.cu" />
+    <None Include="assets\CUDA_kernels\add_particles.cu">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\CUDA_kernels\update_particles.cu">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="assets\CUDA_kernels\update_velocities.cu">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -23,9 +23,9 @@ namespace source.assets.CUDA_kernels
         
         private static byte[] prepare_kernel(string kernelName)
         {
-            string fileToCompile = File.ReadAllText(kernelName + ".cu");
+            string fileToCompile = File.ReadAllText("./assets/CUDA_kernels/" + kernelName + ".cu");
             
-            CudaRuntimeCompiler rtc = new CudaRuntimeCompiler(fileToCompile, "vectorAdd_kernel");
+            CudaRuntimeCompiler rtc = new CudaRuntimeCompiler(fileToCompile, kernelName);
 
             rtc.Compile(new string[]{});
             

@@ -41,7 +41,9 @@ namespace source.assets.Particles.utils
 
             _gpu.BlockDimensions = new dim3(1, 1, 1);
             _gpu.GridDimensions = new dim3(cnt, 1, 1);
-            _gpu.Run(x, y, z, d_xx, d_yy, d_zz, size);
+            _gpu.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
+                                      d_xx.DevicePointer, d_yy.DevicePointer, d_zz.DevicePointer, 
+                                      size);
             
             d_xx.Dispose();
             d_yy.Dispose();

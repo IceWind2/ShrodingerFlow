@@ -51,7 +51,7 @@ class TestCase
     {
         //PARAMETERS
         int[] vol_size = { 4, 2, 2 };   // box size
-        int[] vol_res = { 64, 64, 64 }; // volume resolution
+        int[] vol_res = { 10, 10, 10 }; // volume resolution
         float hbar = (float)0.1;           // Planck constant
         float dt = 1 / (float)48;             // time step
         int tmax = 1;
@@ -60,7 +60,7 @@ class TestCase
 
         float[] nozzle_cen = { (float)(2 - 1.7), (float)(1 - 0.034), (float)(1 + 0.066) }; // nozzle center
         float nozzle_len = (float)0.5;                   // nozzle length
-        float[] nozzle_rad = new float[1] { (float)0.5 };                   // nozzle radius
+        float nozzle_rad = (float)0.5 ;                   // nozzle radius
 
         var n_particles = 50;   // number of particles
         const int max_particles = 200;
@@ -91,7 +91,7 @@ class TestCase
                 for (int k = 0; k < isJet.GetLength(2); k++)
                 {
                     isJet[i, j, k] = (Math.Abs(isf.px[i, j, k] - nozzle_cen[0]) <= nozzle_len / 2) &&
-                                     ((Math.Pow(isf.py[i, j, k] - nozzle_cen[1], 2) + (isf.pz[i, j, k] - nozzle_cen[2]) * (isf.pz[i, j, k] - nozzle_cen[2])) <= nozzle_rad[0] * nozzle_rad[0]);
+                                     ((Math.Pow(isf.py[i, j, k] - nozzle_cen[1], 2) + (isf.pz[i, j, k] - nozzle_cen[2]) * (isf.pz[i, j, k] - nozzle_cen[2])) <= nozzle_rad * nozzle_rad);
                     psi1[i, j, k] = 1;
                     psi2[i, j, k] = 0.01;
                 }
@@ -114,7 +114,7 @@ class TestCase
         time.Start();
 
         Console.WriteLine("Start");
-        for (int iter = 0; iter < 4; iter++)
+        for (int iter = 0; iter < 1; iter++)
         {
             var t = iter * dt;
 
@@ -128,7 +128,7 @@ class TestCase
 
             //particle birth
             Particles.add_particles(n_particles, nozzle_cen, nozzle_rad);
-
+            
             //advect and show particles
             vel = isf.velocity_oneForm(psi1, psi2, isf.hbar);
             vel = isf.staggered_sharp(vel.vx, vel.vy, vel.vz);
@@ -142,7 +142,7 @@ class TestCase
 
         for (int i = 0; i < 10; i++)
         {
-            Console.Out.WriteLine(xx[i] + ' ' + yy[i] + ' ' + zz[i]);
+            Console.Out.WriteLine(xx[i] + " " + yy[i] + " " + zz[i]);
         }
         
         time.Stop();

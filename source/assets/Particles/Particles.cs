@@ -31,7 +31,7 @@ namespace source.assets.Particles
             VelocityHandler.init(torus, _maxCnt);
         }
 
-        public static void add_particles(int cnt, float[] nozzle_cen, float[] nozzle_rad)
+        public static void add_particles(int cnt, float[] nozzle_cen, float nozzle_rad)
         {
             var tmp = UpdateHandler.create_random(cnt);
 
@@ -42,8 +42,8 @@ namespace source.assets.Particles
             for (int i = 0; i < cnt; i++)
             {
                 xx[i] = nozzle_cen[0];
-                yy[i] = (float)(nozzle_cen[1] + 0.9 * nozzle_rad[0] * tmp.cos[i]);
-                zz[i] = (float)(nozzle_cen[2] + 0.9 * nozzle_rad[0] * tmp.sin[i]);
+                yy[i] = (float)(nozzle_cen[1] + 0.9 * nozzle_rad * tmp.cos[i]);
+                zz[i] = (float)(nozzle_cen[2] + 0.9 * nozzle_rad * tmp.sin[i]);
             }
 
             UpdateHandler.update_particles(xx, yy, zz, cnt, _size);
