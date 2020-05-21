@@ -1,19 +1,13 @@
 ﻿using System;
-using Cudafy.Host;
+using ManagedCuda;
 
 namespace source.assets.Particles.utils
 {
     public abstract class Handler
     {
-        protected static GPGPU _gpu;
-        protected static float[] x, y, z;
-
-        public static void set_gpu(GPGPU gpu)
-        {
-            _gpu = gpu;
-        }
-
-        public static void set_particles(float[] xx, float[] yy, float[] zz)
+        protected static CudaDeviceVariable<float> x, y, z;
+        
+        public static void set_particles(CudaDeviceVariable<float> xx, CudaDeviceVariable<float> yy, CudaDeviceVariable<float> zz)
         {
             x = xx;
             y = yy;

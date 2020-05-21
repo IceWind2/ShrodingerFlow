@@ -1,76 +1,95 @@
 ﻿using System;
-using Cudafy;
-using Cudafy.Host;
-using Cudafy.Translator;
-
+using ManagedCuda;
+using ManagedCuda.VectorTypes;
+using source.assets.CUDA_kernels;
 using source.assets.Discrete_space;
 
 namespace source.assets.Particles.utils
 {
     public class VelocityHandler : Handler
     {
-        private static int[] torus_res, torus_size;
-        private static float[] torus_d;
+        private static CudaDeviceVariable<int> torus_res, torus_size;
+        private static CudaDeviceVariable<float> torus_d;
+        private static int num;
         private static float _dt;
-        private static float[] d_k1x, d_k1y, d_k1z, d_k2x, d_k2y, d_k2z, d_k3x, d_k3y, d_k3z, d_k4x, d_k4y, d_k4z;
+        private static CudaDeviceVariable<float> d_k1x, d_k1y, d_k1z, d_k2x, d_k2y, d_k2z, d_k3x, d_k3y, d_k3z, d_k4x, d_k4y, d_k4z;
+        private static CudaKernel _gpuVelocity, _gpuUpdate; 
 
-        public static void init(ISF torus, int maxCnt)
+        public static void init(int maxCnt)
         {
-            _dt = torus.dt;
+            _gpuVelocity = KernelLoader.load_kernel("update_velocities");
+            _gpuUpdate = KernelLoader.load_kernel("update_particles");
+            
+            _dt = ISF.properties.dt;
 
-            torus_d = _gpu.CopyToDevice(new float[3] { torus.dx, torus.dy, torus.dz });
-            torus_res = _gpu.CopyToDevice(new int[3] { torus.resx, torus.resy, torus.resz });
-            torus_size = _gpu.CopyToDevice(new int[3] { torus.sizex, torus.sizey, torus.sizez });
+            torus_d = new float[3] {ISF.properties.dx, ISF.properties.dy, ISF.properties.dz};
+            torus_res = new int[3] {ISF.properties.resx, ISF.properties.resy, ISF.properties.resz};
+            torus_size = new int[3] { ISF.properties.sizex, ISF.properties.sizey, ISF.properties.sizez };
+            num = torus_res[0] * torus_res[1] * torus_res[2];
+            
+            d_k1x = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k1y = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k1z = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
 
-            d_k1x = _gpu.Allocate<float>(maxCnt);
-            d_k1y = _gpu.Allocate<float>(maxCnt);
-            d_k1z = _gpu.Allocate<float>(maxCnt);
+            d_k2x = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k2y = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k2z = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
 
-            d_k2x = _gpu.Allocate<float>(maxCnt);
-            d_k2y = _gpu.Allocate<float>(maxCnt);
-            d_k2z = _gpu.Allocate<float>(maxCnt);
+            d_k3x = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k3y = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k3z = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
 
-            d_k3x = _gpu.Allocate<float>(maxCnt);
-            d_k3y = _gpu.Allocate<float>(maxCnt);
-            d_k3z = _gpu.Allocate<float>(maxCnt);
-
-            d_k4x = _gpu.Allocate<float>(maxCnt);
-            d_k4y = _gpu.Allocate<float>(maxCnt);
-            d_k4z = _gpu.Allocate<float>(maxCnt);
+            d_k4x = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k4y = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k4z = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
         }
 
-        public static void update_particles(float[,,] vx, float[,,] vy, float[,,] vz, int cnt)
+        public static void update_particles(CudaDeviceVariable<float> d_vx, CudaDeviceVariable<float> d_vy, CudaDeviceVariable<float> d_vz, int cnt)
         {
-            int[] d_cnt = _gpu.CopyToDevice(new int[1] { cnt });
-            float[] d_dt = _gpu.CopyToDevice(new float[1] { 0 });
+            float d_dt = 0;
 
-            float[,,] d_vx = _gpu.CopyToDevice(vx);
-            float[,,] d_vy = _gpu.CopyToDevice(vy);
-            float[,,] d_vz = _gpu.CopyToDevice(vz);
+            _gpuVelocity.BlockDimensions = new dim3(1, 1, 1);
+            _gpuVelocity.GridDimensions = new dim3(cnt, 1, 1);
+            
+            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
+                                              d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
+                                              d_dt, 
+                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
+                                              d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
+                                              torus_size.DevicePointer, torus_res.DevicePointer, torus_d.DevicePointer);
 
-            _gpu.Launch(cnt, 1, "staggered_velocity", x, y, z, d_k1x, d_k1y, d_k1z, d_dt, d_vx, d_vy, d_vz, d_k1x, d_k1y, d_k1z, torus_size, torus_res, torus_d);
-
-            _gpu.Free(d_dt);
-            d_dt = _gpu.CopyToDevice(new float[1] { _dt * (float)0.5 });
-
-            _gpu.Launch(cnt, 1, "staggered_velocity", x, y, z, d_k1x, d_k1y, d_k1z, d_dt, d_vx, d_vy, d_vz, d_k2x, d_k2y, d_k2z, torus_size, torus_res, torus_d);
-
-            _gpu.Launch(cnt, 1, "staggered_velocity", x, y, z, d_k2x, d_k2y, d_k2z, d_dt, d_vx, d_vy, d_vz, d_k3x, d_k3y, d_k3z, torus_size, torus_res, torus_d);
-
-            _gpu.Free(d_dt);
-            d_dt = _gpu.CopyToDevice(new float[1] { _dt });
-
-            _gpu.Launch(cnt, 1, "staggered_velocity", x, y, z, d_k3x, d_k3y, d_k3z, d_dt, d_vx, d_vy, d_vz, d_k4x, d_k4y, d_k4z, torus_size, torus_res, torus_d);
-
-            _gpu.Launch(cnt, 3, "update", x, y, z, d_k1x, d_k1y, d_k1z, d_k2x, d_k2y, d_k2z, d_k3x, d_k3y, d_k3z,
-                d_k4x, d_k4y, d_k4z, d_cnt, d_dt);
-
-
-            _gpu.Free(d_vx);
-            _gpu.Free(d_vy);
-            _gpu.Free(d_vz);
-            _gpu.Free(d_cnt);
-            _gpu.Free(d_dt);
-        }   
+            d_dt = _dt * (float)0.5;
+            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
+                                              d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
+                                              d_dt, 
+                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
+                                              d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer, 
+                                              torus_size.DevicePointer, torus_res.DevicePointer, torus_d.DevicePointer);
+            
+            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
+                                              d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer, 
+                                              d_dt, 
+                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
+                                              d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer, 
+                                              torus_size.DevicePointer, torus_res.DevicePointer, torus_d.DevicePointer);
+            
+            d_dt = _dt;
+            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
+                                              d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer, 
+                                              d_dt, 
+                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
+                                              d_k4x.DevicePointer, d_k4y.DevicePointer, d_k4z.DevicePointer,
+                                              torus_size.DevicePointer, torus_res.DevicePointer, torus_d.DevicePointer);
+            
+            _gpuUpdate.BlockDimensions = new dim3(3, 1, 1);
+            _gpuUpdate.GridDimensions = new dim3(cnt, 1, 1);
+            
+            _gpuUpdate.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
+                                            d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
+                                            d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer, 
+                                            d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer, 
+                                            d_k4x.DevicePointer, d_k4y.DevicePointer, d_k4z.DevicePointer, 
+                                            d_dt);
+        }
     }
 }
