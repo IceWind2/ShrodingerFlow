@@ -10,7 +10,6 @@ namespace source.assets.Particles.utils
     {
         private static CudaDeviceVariable<int> torus_res, torus_size;
         private static CudaDeviceVariable<float> torus_d;
-        private static int num;
         private static float _dt;
         private static CudaDeviceVariable<float> d_k1x, d_k1y, d_k1z, d_k2x, d_k2y, d_k2z, d_k3x, d_k3y, d_k3z, d_k4x, d_k4y, d_k4z;
         private static CudaKernel _gpuVelocity, _gpuUpdate; 
@@ -25,8 +24,7 @@ namespace source.assets.Particles.utils
             torus_d = new float[3] {ISF.properties.dx, ISF.properties.dy, ISF.properties.dz};
             torus_res = new int[3] {ISF.properties.resx, ISF.properties.resy, ISF.properties.resz};
             torus_size = new int[3] { ISF.properties.sizex, ISF.properties.sizey, ISF.properties.sizez };
-            num = torus_res[0] * torus_res[1] * torus_res[2];
-            
+
             d_k1x = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
             d_k1y = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
             d_k1z = new CudaDeviceVariable<float>(maxCnt * sizeof(float));

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ManagedCuda.VectorTypes;
 using UnityEngine;
 using source.assets.Discrete_space;
 using source.assets.Particles;
@@ -24,6 +25,7 @@ public class SFParticles : MonoBehaviour
     private int max_particles = n_particles * max_iter;     // max number of particles
     private Simulation s;
     private Velocity vel;
+    private cuFloatComplex[,,] ttt;
     void Start()
     {
         particleSystem = GetComponent<ParticleSystem>();
@@ -33,6 +35,13 @@ public class SFParticles : MonoBehaviour
         s = new Simulation(ISF.properties.resx, ISF.properties.resy, ISF.properties.resz, ISF.properties.hbar,
             ISF.properties.px, ISF.properties.py, ISF.properties.pz);
         vel = new Velocity(ISF.properties.resx, ISF.properties.resy, ISF.properties.resz);
+        for (int i = 0; i < 10; i++)
+        {
+            ISF.Constraint(s);
+        }
+
+        ttt = new cuFloatComplex[vol_res[0], vol_res[1], vol_res[2]];
+        ISF.psi1.CopyToHost(ttt);
     }
     
     void Update()
@@ -63,11 +72,6 @@ public class SFParticles : MonoBehaviour
 
         DrawPoints();
 
-        if (bPointsUpdated)
-        {
-            particleSystem.SetParticles(cloud, cloud.Length);
-            bPointsUpdated = false;
-        }
         new WaitForSeconds(0.6f);
     }
 
@@ -92,7 +96,9 @@ public class SFParticles : MonoBehaviour
             cloud[ii].color = Color.red;
             cloud[ii].size = 0.1f;
         }
-        bPointsUpdated = true;
+        
+        particleSystem.SetParticles(cloud, cloud.Length);
+
     }
 
     public void OnEnable()
