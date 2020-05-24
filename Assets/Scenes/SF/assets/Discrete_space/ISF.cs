@@ -184,6 +184,7 @@ namespace source.assets.Discrete_space
 
             ISFKernels.gauge.Run(psi1.DevicePointer, psi2.DevicePointer, q.DevicePointer);
 
+      
             v.vx.Dispose();
             v.vy.Dispose();
             v.vz.Dispose();

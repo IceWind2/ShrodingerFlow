@@ -17,11 +17,12 @@ public class SFParticles : MonoBehaviour
     private ParticleSystem particleSystem;
     //PARAMETERS
     private  int[] vol_size = { 4, 2, 2 };      // box size
-    private int[] vol_res = { 64, 64, 64 };    // volume resolution
+    private int[] vol_res = { 10, 10, 10 };    // volume resolution
     private float hbar = (float)0.1;           // Planck constant
     private float dt = 1 / (float)48;          // time step
-    private const int n_particles = 100;              // number of particles
-    private const int max_iter = 5;
+    private const int n_particles = 200;              // number of particles
+    private const int max_iter = 20;
+    private int cur_iter = 0;
     private int max_particles = n_particles * max_iter;     // max number of particles
     private Simulation s;
     private Velocity vel;
@@ -51,17 +52,18 @@ public class SFParticles : MonoBehaviour
         time.Start();
 
         Debug.Log("Start");
-        for (int i = 0; i < max_iter; i++)
-        {
-            ISF.update_space(s);
+        ISF.update_space(s);
 
+        if (cur_iter < max_iter)
+        {
             var tmp = s.generate_particles(n_particles);
             Particles.add_particles(tmp.x, tmp.y, tmp.z, n_particles);
-
-            ISF.update_velocities(vel);
-
-            Particles.calculate_movement(vel.vx, vel.vy, vel.vz);
         }
+
+        ISF.update_velocities(vel);
+
+        Particles.calculate_movement(vel.vx, vel.vy, vel.vz);
+        
 
         time.Stop();
         TimeSpan ts = time.Elapsed;
@@ -71,7 +73,7 @@ public class SFParticles : MonoBehaviour
         Debug.Log("RunTime " + elapsedTime);
 
         DrawPoints();
-
+        cur_iter += 1;
         new WaitForSeconds(0.6f);
     }
 

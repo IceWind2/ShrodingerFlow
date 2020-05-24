@@ -5,13 +5,13 @@ using ManagedCuda.NVRTC;
 
 namespace source.assets.CUDA_kernels
 {
-    public class KernelLoader : PrimaryContext
+    public class KernelLoader
     {
-        private static PrimaryContext ctx = null;
+        private static CudaContext ctx = null;
         private static string basePath = "./Assets/Scenes/SF/assets/CUDA_kernels/";
         public static void init_loader() {
             if (ctx == null) {
-                ctx = new PrimaryContext();
+                ctx = new CudaContext(0);
             }
         }
 

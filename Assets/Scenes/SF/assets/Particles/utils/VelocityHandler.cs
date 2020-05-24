@@ -25,21 +25,21 @@ namespace source.assets.Particles.utils
             torus_res = new int[3] {ISF.properties.resx, ISF.properties.resy, ISF.properties.resz};
             torus_size = new int[3] { ISF.properties.sizex, ISF.properties.sizey, ISF.properties.sizez };
 
-            d_k1x = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
-            d_k1y = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
-            d_k1z = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k1x = new CudaDeviceVariable<float>(maxCnt);
+            d_k1y = new CudaDeviceVariable<float>(maxCnt);
+            d_k1z = new CudaDeviceVariable<float>(maxCnt);
 
-            d_k2x = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
-            d_k2y = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
-            d_k2z = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k2x = new CudaDeviceVariable<float>(maxCnt);
+            d_k2y = new CudaDeviceVariable<float>(maxCnt);
+            d_k2z = new CudaDeviceVariable<float>(maxCnt);
 
-            d_k3x = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
-            d_k3y = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
-            d_k3z = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k3x = new CudaDeviceVariable<float>(maxCnt);
+            d_k3y = new CudaDeviceVariable<float>(maxCnt);
+            d_k3z = new CudaDeviceVariable<float>(maxCnt);
 
-            d_k4x = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
-            d_k4y = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
-            d_k4z = new CudaDeviceVariable<float>(maxCnt * sizeof(float));
+            d_k4x = new CudaDeviceVariable<float>(maxCnt);
+            d_k4y = new CudaDeviceVariable<float>(maxCnt);
+            d_k4z = new CudaDeviceVariable<float>(maxCnt);
         }
 
         public static void update_particles(CudaDeviceVariable<float> d_vx, CudaDeviceVariable<float> d_vy, CudaDeviceVariable<float> d_vz, int cnt)

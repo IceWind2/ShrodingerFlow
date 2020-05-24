@@ -11,21 +11,21 @@ update_velocities(const float* x, const float* y, const float* z,
             float tmp_x = (int)(x[i] + sh_x) % tor_size[0];
             int ix = (int)(tmp_x / tor_d[0]);
             int ixp = ix % tor_res[0];
-            float wx = tmp_x - (ix - 1) * tor_d[0];
+            float wx = tmp_x - (ix) * tor_d[0];
 
             //INIT Y indices
             float sh_y = shiftY[i] * fact;
             float tmp_y = (int)(y[i] + sh_y) % tor_size[1];
             int iy = (int)(tmp_y / tor_d[1]);
             int iyp = iy % tor_res[1];
-            float wy = tmp_y - (iy - 1) * tor_d[1];
+            float wy = tmp_y - (iy) * tor_d[1];
 
             //INIT Z indices
             float sh_z = shiftZ[i] * fact;
             float tmp_z = (int)(z[i] + sh_z) % tor_size[2];
             int iz = (int)(tmp_z / tor_d[2]);
             int izp = iz % tor_res[2];
-            float wz = tmp_z - (iz - 1) * tor_d[2];
+            float wz = tmp_z - (iz) * tor_d[2];
 
             //Calculate Velocities
             _ux[i] = (1 - wz) * ((1 - wy) * vx[ix * tor_res[2] * tor_res[1] + iy * tor_res[2] + iz] + wy * vx[ix* tor_res[2] * tor_res[1] + iyp * tor_res[2] + iz]) +

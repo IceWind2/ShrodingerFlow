@@ -112,17 +112,17 @@ namespace source
                             tmp2 = amp2 * Complex.Exp(Complex.ImaginaryOne * phase);
                             psi1[i, j, k] = new cuFloatComplex((float)tmp1.Real, (float)tmp1.Imaginary);
                             psi2[i, j, k] = new cuFloatComplex((float)tmp2.Real, (float)tmp2.Imaginary);
-                            
+                            var rnd = new Random();
                             if (float.IsInfinity(psi1[i, j, k].real) || float.IsNaN(psi1[i, j, k].real))
                             {
-                                psi1[i, j, k].real = 1;
-                                psi1[i, j, k].imag = 1;
+                                psi1[i, j, k].real = (float)rnd.NextDouble() * 30;
+                                psi1[i, j, k].imag = (float)rnd.NextDouble() * 30;
                             }
                             
                             if (float.IsInfinity(psi2[i, j, k].real) || float.IsNaN(psi2[i, j, k].real))
                             {
-                                psi2[i, j, k].real = (float)0.01;
-                                psi2[i, j, k].imag = (float)0.01;
+                                psi2[i, j, k].real = (float)rnd.NextDouble() * 3;
+                                psi2[i, j, k].imag = (float)rnd.NextDouble() * 3;
                             }
                         }
                     }

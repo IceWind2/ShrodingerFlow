@@ -9,11 +9,11 @@ gauge(float2* psi1, float2* psi2, float2* q)
     psi2[i] = make_float2(psi2[i].x * eiq.x - psi2[i].y * eiq.y, psi2[i].x * eiq.y + psi2[i].y * eiq.x);
     
     if (!isfinite(psi1[i].x)) {
-        psi1[i].x = 1;
-        psi1[i].y = 1;
+        psi1[i].x = -1;
+        psi1[i].y = -1;
     }
     if (!isfinite(psi2[i].x)) {
-        psi2[i].x = (float)0.01;
-        psi2[i].y = (float)0.01;
+        psi2[i].x = -1;
+        psi2[i].y = -1;
     }
 }

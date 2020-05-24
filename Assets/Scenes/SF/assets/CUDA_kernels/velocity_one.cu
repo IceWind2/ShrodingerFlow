@@ -28,12 +28,12 @@ velocity_one(float2* psi1, float2* psi2, int resy, int resz, int num, float hbar
     vx[i] = result * hbar;
     
     if (!isfinite(vx[i])) {
-        vx[i] = 1;
+        vx[i] = -2;
     }
     if (!isfinite(vy[i])) {
-        vy[i] = 1;
+        vy[i] = -2;
     }
     if (!isfinite(vz[i])) {
-        vz[i] = 1;
+        vz[i] = -2;
     }
 }
