@@ -1,5 +1,6 @@
 using System;
 using System.Numerics;
+using ManagedCuda.VectorTypes;
 
 namespace source
 {
@@ -90,24 +91,39 @@ namespace source
             }
         }
     
-        public void constraint(Complex[,,] psi1, Complex[,,] psi2, float t)
+        public void constraint(cuFloatComplex[,,] psi1, cuFloatComplex[,,] psi2, float t)
         {
             float phase;
             Complex amp1, amp2;
-
+            Complex tmp1, tmp2;
+            
             for (int i = 0; i < psi1.GetLength(0); i++)
             {
                 for (int j = 0; j < psi1.GetLength(1); j++)
                 {
                     for (int k = 0; k < psi1.GetLength(2); k++)
                     {
-                        amp1 = Complex.Abs(psi1[i, j, k]);
-                        amp2 = Complex.Abs(psi2[i, j, k]);
+                        amp1 = Complex.Sqrt(psi1[i, j, k].real * psi1[i, j, k].real + psi1[i, j, k].imag * psi1[i, j, k].imag);
+                        amp2 = Complex.Sqrt(psi2[i, j, k].real * psi2[i, j, k].real + psi2[i, j, k].imag * psi2[i, j, k].imag);
                         phase = kvec[0] * _px[i, j, k] + kvec[1] * _py[i, j, k] + kvec[2] * _pz[i, j, k] - omega * t;
                         if (isJet[i, j, k])
                         {
-                            psi1[i, j, k] = amp1 * Complex.Exp(Complex.ImaginaryOne * phase);
-                            psi2[i, j, k] = amp2* Complex.Exp(Complex.ImaginaryOne * phase);
+                            tmp1 = amp1 * Complex.Exp(Complex.ImaginaryOne * phase);
+                            tmp2 = amp2 * Complex.Exp(Complex.ImaginaryOne * phase);
+                            psi1[i, j, k] = new cuFloatComplex((float)tmp1.Real, (float)tmp1.Imaginary);
+                            psi2[i, j, k] = new cuFloatComplex((float)tmp2.Real, (float)tmp2.Imaginary);
+                            
+                            if (float.IsInfinity(psi1[i, j, k].real) || float.IsNaN(psi1[i, j, k].real))
+                            {
+                                psi1[i, j, k].real = 1;
+                                psi1[i, j, k].imag = 1;
+                            }
+                            
+                            if (float.IsInfinity(psi2[i, j, k].real) || float.IsNaN(psi2[i, j, k].real))
+                            {
+                                psi2[i, j, k].real = (float)0.01;
+                                psi2[i, j, k].imag = (float)0.01;
+                            }
                         }
                     }
                 }

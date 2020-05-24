@@ -10,45 +10,30 @@ velocity_one(float2* psi1, float2* psi2, int resy, int resz, int num, float hbar
     float2 mul2 = psi2[(i + 1) % num];
     float2 summ = make_float2((c1.x * mul1.x - c1.y * mul1.y + c2.x * mul2.x - c2.y * mul2.y), 
                              (c1.x * mul1.y + c1.y * mul1.x + c2.x * mul2.y + c2.y * mul2.x));
-    /*float result = 0;
-    if (summ.x > 0) {
-        result = atan(summ.y, summ.x);
-    }
-    else if (summ.y > 0) {
-        result = pi - atan(summ.y, -summ.x);
-    }
-    else {
-        result = -pi + atan(summ.y, summ.x);
-    }
+    float result = (float)atan2(summ.y, summ.x);
     vz[i] = (float)result * hbar;
                             
     mul1 = psi1[(i + resz) % num];
     mul2 = psi2[(i + resz) % num];
     summ = make_float2((c1.x * mul1.x - c1.y * mul1.y + c2.x * mul2.x - c2.y * mul2.y), 
                       (c1.x * mul1.y + c1.y * mul1.x + c2.x * mul2.y + c2.y * mul2.x));
-    if (summ.x > 0) {
-        result = atan(summ.y, summ.x);
-    }
-    else if (summ.y > 0) {
-        result = pi - atan(summ.y, -summ.x);
-    }
-    else {
-        result = -pi + atan(summ.y, summ.x);
-    }
-    vy[i] = (float)result * hbar;
+    result = (float)atan2(summ.y, summ.x);
+    vy[i] = result * hbar;
     
     mul1 = psi1[(i + resz * resy) % num];
     mul2 = psi2[(i + resz * resy) % num];
     summ = make_float2((c1.x * mul1.x - c1.y * mul1.y + c2.x * mul2.x - c2.y * mul2.y), 
                       (c1.x * mul1.y + c1.y * mul1.x + c2.x * mul2.y + c2.y * mul2.x));
-    if (summ.x > 0) {
-        result = atan(summ.y, summ.x);
+    result = (float)atan2(summ.y, summ.x);
+    vx[i] = result * hbar;
+    
+    if (!isfinite(vx[i])) {
+        vx[i] = 1;
     }
-    else if (summ.y > 0) {
-        result = pi - atan(summ.y, -summ.x);
+    if (!isfinite(vy[i])) {
+        vy[i] = 1;
     }
-    else {
-        result = -pi + atan(summ.y, summ.x);
+    if (!isfinite(vz[i])) {
+        vz[i] = 1;
     }
-    vx[i] = (float)result * hbar;*/
 }
