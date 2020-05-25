@@ -1,50 +1,40 @@
 extern "C" __global__ void
-shift(float* arr, int resx, int resy, int resz, int size)
+shift(float2* arr, int resx, int resy, int resz, int size)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     int idx = resx / 2;
+    int idy = resy / 2;
+    int idz = resz / 2;
+    
+    float2 tmp;
     
     if (i / resy / resz < idx) {
-        if (i / resz % resz < idx) {
-            if (i % resz < idx) {
+        if (i / resz % resy < idy) {
+            if (i % resz < idz) {
                 //0
-                arr[i] = arr[(i + idx + idx * resz + idx * resy * resz) % size];
+                tmp = arr[i];
+                arr[i] = arr[i + idz + idy * resz + idx * resy * resz];
+                arr[i + idz + idy * resz + idx * resy * resz] = tmp;
             }
             else {
                 //1
-                arr[i] = arr[(i - idx + idx * resz + idx * resy * resz + size) % size];
+                tmp = arr[i];
+                arr[i] = arr[i - idz + idy * resz + idx * resy * resz];
+                arr[i - idz + idy * resz + idx * resy * resz] = tmp;
             }
         }
         else {
-            if (i % resz < idx) {
+            if (i % resz < idz) {
                 //2
-                arr[i] = arr[(i + idx - idx * resz + idx * resy * resz + size) % size];
+                tmp = arr[i];
+                arr[i] = arr[i + idz - idy * resz + idx * resy * resz];
+                arr[i + idz - idy * resz + idx * resy * resz] = tmp;
             }
             else {
                 //3
-                arr[i] = arr[(i - idx - idx * resz + idx * resy * resz + size) % size];
-            }
-        }
-    }
-    else {
-        if (i / resz % resz < idx) {
-            if (i % resz < idx) {
-                //4
-                arr[i] = arr[(i + idx + idx * resz - idx * resy * resz + size) % size];
-            }
-            else {
-                //5
-                arr[i] = arr[(i - idx + idx * resz - idx * resy * resz + size) % size];
-            }
-        }
-        else {
-            if (i % resz < idx) {
-                //6
-                arr[i] = arr[(i + idx - idx * resz - idx * resy * resz + size) % size];
-            }
-            else {
-                //7
-                arr[i] = arr[(i - idx - idx * resz - idx * resy * resz + size) % size];
+                tmp = arr[i];
+                arr[i] = arr[i - idz - idy * resz + idx * resy * resz];
+                arr[i - idz - idy * resz + idx * resy * resz] = tmp;
             }
         }
     }

@@ -6,17 +6,20 @@ update_particles(float* x, float* y, float* z,
                  const float* k4x, const float* k4y, const float* k4z,
                  float dt)
 {
-    int i = blockDim.x * blockIdx.x;
-    switch (threadIdx.x)
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    switch (i % 3)
     {
         case 0:
-            x[i] += (k1x[i] + 2 * k2x[i] + 2 * k3x[i] + k4x[i]) * dt / 6;
+            i /= 3;
+            x[i] += ((k1x[i] + 2 * k2x[i] + 2 * k3x[i] + k4x[i]) * dt / 6.0);
             break;
         case 1:
-            y[i] += (k1y[i] + 2 * k2y[i] + 2 * k3y[i] + k4y[i]) * dt / 6;
+            i /= 3;
+            y[i] += ((k1y[i] + 2 * k2y[i] + 2 * k3y[i] + k4y[i]) * dt / 6.0);
             break;
         case 2:
-            z[i] += (k1z[i] + 2 * k2z[i] + 2 * k3z[i] + k4z[i]) * dt / 6;
+            i /= 3;
+            z[i] += ((k1z[i] + 2 * k2z[i] + 2 * k3z[i] + k4z[i]) * dt / 6.0);
             break;
     }
 }

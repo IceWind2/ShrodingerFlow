@@ -31,16 +31,17 @@ namespace source.assets.Discrete_space.utils
         {
             var result = new CudaDeviceVariable<cuFloatComplex>(ISF.properties.num);
             ISFKernels.copy.Run(result.DevicePointer, data.DevicePointer);
-
+            
             if (!inverse)
             {
-                _plan3DR.Exec(result.DevicePointer, TransformDirection.Forward);
+                _plan3DC.Exec(result.DevicePointer, TransformDirection.Forward);
             }
             else
             {
-                _plan3DR.Exec(result.DevicePointer, TransformDirection.Inverse);
+                _plan3DC.Exec(result.DevicePointer, TransformDirection.Inverse);
             }
 
+            
             return result;
         }
     }

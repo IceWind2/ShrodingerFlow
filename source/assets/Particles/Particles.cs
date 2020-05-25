@@ -11,10 +11,9 @@ namespace source.assets.Particles
 
         public static void init(int max_particles)
         {
-            SizeT size = max_particles * sizeof(float);
-            x = new CudaDeviceVariable<float>(size);
-            y = new CudaDeviceVariable<float>(size);
-            z = new CudaDeviceVariable<float>(size);
+            x = new CudaDeviceVariable<float>(max_particles);
+            y = new CudaDeviceVariable<float>(max_particles);
+            z = new CudaDeviceVariable<float>(max_particles);
 
             _size = 0;
             _maxCnt = max_particles;
@@ -33,9 +32,9 @@ namespace source.assets.Particles
             _size += cnt;
         }
 
-        public static void calculate_movement(CudaDeviceVariable<float> vx, CudaDeviceVariable<float> vy, CudaDeviceVariable<float> vz)
+        public static void calculate_movement(Velocity vel)
         {
-            VelocityHandler.update_particles(vx, vy, vz, _size);
+            VelocityHandler.update_particles(vel.vx, vel.vy, vel.vz, _size);
         }
     }
 }

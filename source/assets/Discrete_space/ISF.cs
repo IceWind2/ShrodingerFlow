@@ -36,8 +36,6 @@ namespace source.assets.Discrete_space
             _iiy = ii.y;
             _iiz = ii.z;
             
-            var tmp1 = new cuFloatComplex[properties.resx, properties.resy, properties.resz];
-            var tmp2 = new cuFloatComplex[properties.resx, properties.resy, properties.resz];
             properties.px = new float[_iix.GetLength(0), _iix.GetLength(1), _iix.GetLength(2)];
             properties.py = new float[_iiy.GetLength(0), _iiy.GetLength(1), _iiy.GetLength(2)];
             properties.pz = new float[_iiz.GetLength(0), _iiz.GetLength(1), _iiz.GetLength(2)];
@@ -50,16 +48,13 @@ namespace source.assets.Discrete_space
                         properties.px[i, j, k] = (_iix[i, j, k]) * properties.dx;
                         properties.py[i, j, k] = (_iiy[i, j, k]) * properties.dy;
                         properties.pz[i, j, k] = (_iiz[i, j, k]) * properties.dz;
-
-                        tmp1[i, j, k] = new cuFloatComplex(1, 0);
-                        tmp2[i, j, k] = new cuFloatComplex((float)0.01, 0);
                     }
                 }
             }
             
-            _sx = _iix.Select3D((e, i, j, k) => (float)Math.Sin((float)Math.PI / properties.resx) / properties.dx);
-            _sy = _iiy.Select3D((e, i, j, k) => (float)Math.Sin((float)Math.PI / properties.resy) / properties.dy);
-            _sz = _iiz.Select3D((e, i, j, k) => (float)Math.Sin((float)Math.PI / properties.resz) / properties.dz);
+            _sx = _iix.Select3D((e, i, j, k) => (float)Math.Sin((float)Math.PI * e / properties.resx) / properties.dx);
+            _sy = _iiy.Select3D((e, i, j, k) => (float)Math.Sin((float)Math.PI * e / properties.resy) / properties.dy);
+            _sz = _iiz.Select3D((e, i, j, k) => (float)Math.Sin((float)Math.PI * e / properties.resz) / properties.dz);
             
             cuFloatComplex[,,] tmpFac = _iix.Select3D((e, i, j, k) =>
             {
@@ -68,52 +63,44 @@ namespace source.assets.Discrete_space
             tmpFac[0, 0, 0] = new cuFloatComplex(0, 0);
             _fac = new CudaDeviceVariable<cuFloatComplex>(properties.num);
             _fac.CopyToDevice(tmpFac);
-            
-            psi1.CopyToDevice(tmp1);
-            psi2.CopyToDevice(tmp2);
-            Normalize();
-            
+
             var tmpMask = new cuFloatComplex[properties.resx, properties.resy, properties.resz];
             build_schroedinger(tmpMask);
             _mask = new CudaDeviceVariable<cuFloatComplex>(properties.num);
             _mask.CopyToDevice(tmpMask);
         }
         
-        public static void update_space(Simulation s)
+        public static void update_space()
         {
             t += properties.dt;
             
             schroedinger_flow();
             Normalize();
             PressureProject();
-            
-            Constraint(s);
         }
 
         public static void update_velocities(Velocity vel)
         {
-            velocity_oneForm(vel);
+            velocity_oneForm(vel, properties.hbar);
             staggered_sharp(vel);
         }
         
         private static void build_schroedinger(cuFloatComplex[,,] tmpMask)
         {
             var fac = -4 * Math.Pow(Math.PI, 2) * properties.hbar;
-            
-            float[,,] kx = new float[_iix.GetLength(0), _iix.GetLength(1), _iix.GetLength(2)];
-            float[,,] ky = new float[_iiy.GetLength(0), _iiy.GetLength(1), _iiy.GetLength(2)];
-            float[,,] kz = new float[_iiz.GetLength(0), _iiz.GetLength(1), _iiz.GetLength(2)];
+
+            float kx, ky, kz;
             for (int i = 0; i < _iix.GetLength(0); i++)
             {
                 for (int j = 0; j < _iix.GetLength(1); j++)
                 {
                     for (int k = 0; k < _iix.GetLength(2); k++)
                     {
-                        kx[i, j, k] = (_iix[i, j, k] - 1 - (float)properties.resx / 2) / properties.sizex;
-                        kx[i, j, k] = (_iiy[i, j, k] - 1 - (float)properties.resy / 2) / properties.sizey;
-                        kx[i, j, k] = (_iiz[i, j, k] - 1 - (float)properties.resz / 2) / properties.sizez;
+                        kx = (_iix[i, j, k] - (float)properties.resx / 2) / properties.sizex;
+                        ky = (_iiy[i, j, k] - (float)properties.resy / 2) / properties.sizey;
+                        kz = (_iiz[i, j, k] - (float)properties.resz / 2) / properties.sizez;
 
-                        var lambda = fac * (Math.Pow(kx[i, j, k], 2) + Math.Pow(ky[i, j, k], 2) + Math.Pow(kz[i, j, k], 2));
+                        var lambda = fac * (Math.Pow(kx, 2) + Math.Pow(ky, 2) + Math.Pow(kz, 2));
                         var tmp = Complex.Exp(Complex.ImaginaryOne * lambda * properties.dt / 2f);
                         tmpMask[i, j, k] = new cuFloatComplex((float)tmp.Real, (float)tmp.Imaginary);
                     }
@@ -128,7 +115,7 @@ namespace source.assets.Discrete_space
 
             ISFKernels.shift.Run(psi1.DevicePointer, properties.resx, properties.resy, properties.resz, properties.num);
             ISFKernels.shift.Run(psi2.DevicePointer, properties.resx, properties.resy, properties.resz, properties.num);
-            
+
             ISFKernels.mul_each.Run(psi1.DevicePointer, _mask.DevicePointer);
             ISFKernels.mul_each.Run(psi2.DevicePointer, _mask.DevicePointer);
 
@@ -137,6 +124,9 @@ namespace source.assets.Discrete_space
             
             FFT.fft_c(psi1, true);
             FFT.fft_c(psi2, true);
+
+            ISFKernels.fft_norm.Run(psi1.DevicePointer, properties.num);
+            ISFKernels.fft_norm.Run(psi2.DevicePointer, properties.num);
         }
         
         private static void staggered_sharp(Velocity vel)
@@ -146,10 +136,10 @@ namespace source.assets.Discrete_space
             ISFKernels.staggered.Run(vel.vz.DevicePointer, properties.dz);
         }
         
-        private static void velocity_oneForm(Velocity v)
+        private static void velocity_oneForm(Velocity v,  float hbar = 1)
         {
             ISFKernels.velocity_one.Run(psi1.DevicePointer, psi2.DevicePointer,
-                              properties.resy, properties.resz, properties.num, properties.hbar, (float) Math.PI,
+                              properties.resy, properties.resz, properties.num, hbar, (float) Math.PI,
                               v.vx.DevicePointer, v.vy.DevicePointer, v.vz.DevicePointer);
         }
         
@@ -160,14 +150,14 @@ namespace source.assets.Discrete_space
             ISFKernels.div.Run(res.DevicePointer,
                                        v.vx.DevicePointer, v.vy.DevicePointer, v.vz.DevicePointer,
                                        properties.dx, properties.dy, properties.dz,
-                                       properties.resx, properties.num);
+                                       properties.resx, properties.resy, properties.resz, properties.num);
             return res;
         }
         
         private static CudaDeviceVariable<cuFloatComplex> PoissonSolve(CudaDeviceVariable<float> f)
         {
             var res = FFT.fft_r(f, false);
-
+        
             ISFKernels.mul_each.Run(res.DevicePointer, _fac.DevicePointer);
 
             FFT.fft_c(res, true);
@@ -175,14 +165,15 @@ namespace source.assets.Discrete_space
             return res;
         }
         
-        private static void PressureProject()
+        public static void PressureProject()
         {
             var v = new Velocity(properties.resx, properties.resy, properties.resz);
             velocity_oneForm(v);
             var div = Div(v);
+            
             var q = PoissonSolve(div);
 
-            ISFKernels.gauge.Run(psi1.DevicePointer, psi2.DevicePointer, q.DevicePointer);
+            ISFKernels.gauge.Run(psi1.DevicePointer, psi2.DevicePointer, q.DevicePointer, properties.num);
 
             v.vx.Dispose();
             v.vy.Dispose();
@@ -191,26 +182,51 @@ namespace source.assets.Discrete_space
             q.Dispose();
         }
         
-        private static void Normalize()
+        public static void Normalize()
         {
             ISFKernels.normalize.Run(psi1.DevicePointer, psi2.DevicePointer);
         }
-
-        public static void Constraint(Simulation s)
+        
+        public static void add_circle(cuFloatComplex[,,] psi, float[] center, float[] normal, float r, float d)
         {
-            var tmp1 = new cuFloatComplex[properties.resx, properties.resy, properties.resz];
-            var tmp2 = new cuFloatComplex[properties.resx, properties.resy, properties.resz];
+            float norm = (float)Math.Sqrt(Math.Pow(normal[0], 2) + Math.Pow(normal[1], 2) + Math.Pow(normal[2], 2));
+            for (int i = 0; i < 3; i++)
+            {
+                normal[i] /= norm;
+            }
             
-            psi1.CopyToHost(tmp1);
-            psi2.CopyToHost(tmp2);
+            float alpha, rx, ry, rz, z;
+            Complex tmp;
+            for (int i = 0; i < properties.resx; i++)
+            {
+                for (int j = 0; j < properties.resy; j++)
+                {
+                    for (int k = 0; k < properties.resz; k++)
+                    {
+                        rx = properties.px[i, j, k] - center[0];
+                        ry = properties.py[i, j, k] - center[1];
+                        rz = properties.pz[i, j, k] - center[2];
+                        alpha = 0;
+                        z = rx * normal[0] + ry * normal[1] + rz * normal[2];
+                        if (rx * rx + ry * ry + rz * rz - z * z < r * r)
+                        {
+                            if (z > 0 && z <= d / 2)
+                            {
+                                alpha = (float) -Math.PI * (2 * z / d - 1);
+                            }
 
-            s.constraint(tmp1, tmp2, t);
-            
-            psi1.CopyToDevice(tmp1);
-            psi2.CopyToDevice(tmp2);
-            
-            PressureProject();
+                            if (z <= 0 && z >= -d / 2)
+                            {
+                                alpha = (float) -Math.PI * (2 * z / d + 1);
+                            }
+                        }
+
+                        tmp = new Complex(psi[i, j, k].real, psi[i, j, k].imag);
+                        tmp *= Complex.Exp(Complex.ImaginaryOne * alpha);
+                        psi[i, j, k] = new cuFloatComplex((float)tmp.Real, (float)tmp.Imaginary);
+                    }
+                }
+            }
         }
     }
-
 }
