@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 using ManagedCuda.VectorTypes;
 using UnityEngine;
 using source.assets.Discrete_space;
@@ -9,6 +10,7 @@ using source.assets.Particles;
 using source;
 using source.assets.CUDA_kernels;
 using Debug = UnityEngine.Debug;
+using Vector3 = UnityEngine.Vector3;
 
 public class SFParticles : MonoBehaviour
 {
@@ -16,65 +18,94 @@ public class SFParticles : MonoBehaviour
     bool bPointsUpdated = false;
     private ParticleSystem particleSystem;
     //PARAMETERS
-    private  int[] vol_size = { 4, 2, 2 };      // box size
-    private int[] vol_res = { 10, 10, 10 };    // volume resolution
-    private float hbar = (float)0.1;           // Planck constant
-    private float dt = 1 / (float)48;          // time step
-    private const int n_particles = 200;              // number of particles
-    private const int max_iter = 20;
-    private int cur_iter = 0;
-    private int max_particles = n_particles * max_iter;     // max number of particles
-    private Simulation s;
-    private Velocity vel;
-    private cuFloatComplex[,,] ttt;
+    int[] vol_size = { 10, 5, 5 };      // box size
+    int[] vol_res = { 64, 32, 32 };    // volume resolution
+    float hbar = (float)0.1;           // Planck constant
+    float dt = 1 / (float)24;          // time step
+    int tmax = 85;
+    float[] background_vel = {(float) -0.2, 0, 0};
+        
+    float r1 = (float)1.5; 
+    float r2 = (float)0.9;              
+    float[] n1 = {-1,0,0};         
+    float[] n2 = {-1,0,0};
+
+    int n_particles = 3000;
+
+    Velocity vel;
+    
     void Start()
     {
+        float[] cen1 = {vol_size[0] / 2f, vol_size[1] / 2f, vol_size[2] / 2f}; 
+        float[] cen2 = {vol_size[0] / 2f, vol_size[1] / 2f, vol_size[2] / 2f}; 
+        
         particleSystem = GetComponent<ParticleSystem>();
         //INITIALISATION
         ISF.Init(vol_size, vol_res, hbar, dt);
-        Particles.init(max_particles);
-        s = new Simulation(ISF.properties.resx, ISF.properties.resy, ISF.properties.resz, ISF.properties.hbar,
-            ISF.properties.px, ISF.properties.py, ISF.properties.pz);
-        vel = new Velocity(ISF.properties.resx, ISF.properties.resy, ISF.properties.resz);
-        for (int i = 0; i < 10; i++)
+        Particles.init(n_particles);
+        
+        //init psi
+        float[] kvec = {background_vel[0] / hbar, background_vel[1] / hbar, background_vel[2] / hbar};
+        float phase;
+        var tmp1 = new cuFloatComplex[ISF.properties.resx, ISF.properties.resy, ISF.properties.resz];
+        var tmp2 = new cuFloatComplex[ISF.properties.resx, ISF.properties.resy, ISF.properties.resz];
+        Complex tmp;
+        for (int i = 0; i < vol_res[0]; i++)
         {
-            ISF.Constraint(s);
+            for (int j = 0; j < vol_res[1]; j++)
+            {
+                for (int k = 0; k < vol_res[2]; k++)
+                {
+                    phase = kvec[0] * ISF.properties.px[i, j, k] +
+                            kvec[1] * ISF.properties.py[i, j, k] +
+                            kvec[2] * ISF.properties.pz[i, j, k];
+                    tmp = Complex.Exp(Complex.ImaginaryOne * phase);
+                    tmp1[i, j, k] = new cuFloatComplex((float) tmp.Real, (float) tmp.Imaginary);
+                    tmp2[i, j, k] = new cuFloatComplex((float) (tmp.Real * 0.01), (float) (tmp.Imaginary * 0.01));
+                }
+            }
         }
+        float d = ISF.properties.dx * 5;
+        
+        ISF.add_circle(tmp1, cen1, n1, r1, d);
+        ISF.add_circle(tmp1, cen2, n2, r2, d);
+        
+        ISF.psi1.CopyToDevice(tmp1);
+        ISF.psi2.CopyToDevice(tmp2);
 
-        ttt = new cuFloatComplex[vol_res[0], vol_res[1], vol_res[2]];
-        ISF.psi1.CopyToHost(ttt);
+        ISF.Normalize();
+        ISF.PressureProject();
+        
+        //init particles
+        var x = new float[n_particles];
+        var y = new float[n_particles];
+        var z = new float[n_particles];
+        System.Random rnd = new System.Random();
+        for (int i = 0; i < n_particles; i++)
+        {
+            y[i] = (float)(rnd.NextDouble() * 4 + 0.5);
+            z[i] = (float)(rnd.NextDouble() * 4 + 0.5);
+            x[i] = 5;
+        }
+        
+        Particles.add_particles(x, y, z, n_particles);
+        
+        vel = new Velocity(ISF.properties.resx, ISF.properties.resy, ISF.properties.resz);
     }
     
     void Update()
     {
         //MAIN ITERATION
-        Stopwatch time = new Stopwatch();
-        time.Start();
-
-        Debug.Log("Start");
-        ISF.update_space(s);
-
-        if (cur_iter < max_iter)
-        {
-            var tmp = s.generate_particles(n_particles);
-            Particles.add_particles(tmp.x, tmp.y, tmp.z, n_particles);
-        }
-
+        //incompressible Schroedinger flow
+        ISF.update_space();
+            
+            //particle update
         ISF.update_velocities(vel);
-
-        Particles.calculate_movement(vel.vx, vel.vy, vel.vz);
+            
+        Particles.calculate_movement(vel);
         
-
-        time.Stop();
-        TimeSpan ts = time.Elapsed;
-        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-            ts.Hours, ts.Minutes, ts.Seconds,
-            ts.Milliseconds / 10);
-        Debug.Log("RunTime " + elapsedTime);
-
         DrawPoints();
-        cur_iter += 1;
-        new WaitForSeconds(0.6f);
+        
     }
 
     public void DrawPoints()
@@ -105,10 +136,10 @@ public class SFParticles : MonoBehaviour
 
     public void OnEnable()
     {
-        KernelLoader.init_loader();
+       // KernelLoader.init_loader();
     }
     public void OnDestroy()
     {
-        KernelLoader.dispose_loader();
+        //KernelLoader.dispose_loader();
     }
 }

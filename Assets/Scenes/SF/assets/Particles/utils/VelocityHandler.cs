@@ -79,8 +79,9 @@ namespace source.assets.Particles.utils
                                               d_k4x.DevicePointer, d_k4y.DevicePointer, d_k4z.DevicePointer,
                                               torus_size.DevicePointer, torus_res.DevicePointer, torus_d.DevicePointer);
             
-            _gpuUpdate.BlockDimensions = new dim3(3, 1, 1);
-            _gpuUpdate.GridDimensions = new dim3(cnt, 1, 1);
+            
+            _gpuUpdate.BlockDimensions = new dim3(1, 1, 1);
+            _gpuUpdate.GridDimensions = new dim3(cnt * 3, 1, 1);
             
             _gpuUpdate.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
                                             d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 

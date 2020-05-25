@@ -1,0 +1,38 @@
+/headless/Downloads/ShrodingerFlow-master/source/obj/Debug/.NETFramework,Version=v4.8.AssemblyAttribute.cs
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/ShrodingerFlow.exe.config
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/ShrodingerFlow.pdb
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/ShrodingerFlow.exe
+/headless/Downloads/ShrodingerFlow-master/source/obj/Debug/ShrodingerFlow.exe
+/headless/Downloads/ShrodingerFlow-master/source/obj/Debug/ShrodingerFlow.pdb
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/ManagedCuda.dll
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/NVRTC.dll
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/assets/CUDA_kernels/add_particles.cu
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/assets/CUDA_kernels/update_particles.cu
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/assets/CUDA_kernels/update_velocities.cu
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/CudaFFT.dll
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/assets/CUDA_kernels/dIv.cu
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/assets/CUDA_kernels/staggered_sharp.cu
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/assets/CUDA_kernels/div.cu
+/headless/Downloads/ShrodingerFlow-master/source/bin/Debug/assets/CUDA_kernels/velocity_one.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/obj/Debug/.NETFramework,Version=v4.8.AssemblyAttribute.cs
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/add_particles.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/update_particles.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/update_velocities.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/div.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/staggered_sharp.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/velocity_one.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/ShrodingerFlow.exe.config
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/ShrodingerFlow.pdb
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/ShrodingerFlow.exe
+/headless/Downloads/ShrodingerFlow-master 2/source/obj/Debug/ShrodingerFlow.exe
+/headless/Downloads/ShrodingerFlow-master 2/source/obj/Debug/ShrodingerFlow.pdb
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/CudaFFT.dll
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/ManagedCuda.dll
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/NVRTC.dll
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/normalize.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/gauge.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/shift.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/mul_each.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/copy.cu
+/headless/Downloads/ShrodingerFlow-master 2/source/obj/Debug/.NETFramework,Version=v4.7.1.AssemblyAttribute.cs
+/headless/Downloads/ShrodingerFlow-master 2/source/bin/Debug/assets/CUDA_kernels/fft_norm.cu

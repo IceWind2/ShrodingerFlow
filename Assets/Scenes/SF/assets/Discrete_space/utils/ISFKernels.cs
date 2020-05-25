@@ -6,7 +6,7 @@ namespace source.assets.Discrete_space.utils
 {
     public static class ISFKernels
     {
-        public static CudaKernel staggered, div, velocity_one, normalize, gauge, shift, mul_each, copy;
+        public static CudaKernel staggered, div, velocity_one, normalize, gauge, shift, mul_each, copy, fft_norm;
 
         public static void Init(SpaceProperties properties)
         {
@@ -41,6 +41,10 @@ namespace source.assets.Discrete_space.utils
             copy = KernelLoader.load_kernel("copy");
             copy.BlockDimensions = new dim3(1, 1, 1);
             copy.GridDimensions = new dim3(properties.num, 1, 1);
+
+            fft_norm = KernelLoader.load_kernel("fft_norm");
+            fft_norm.BlockDimensions = new dim3(1, 1, 1);
+            fft_norm.GridDimensions = new dim3(properties.num, 1, 1);
         }
     }
 }

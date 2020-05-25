@@ -7,23 +7,12 @@ namespace source.assets.CUDA_kernels
 {
     public class KernelLoader
     {
-        private static CudaContext ctx = null;
-        private static string basePath = "./Assets/Scenes/SF/assets/CUDA_kernels/";
-        public static void init_loader() {
-            if (ctx == null) {
-                ctx = new CudaContext(0);
-            }
-        }
-
-        public static void dispose_loader()
-        {
-            ctx.Dispose();
-            ctx = null;
-        }
+        private static string dir = "/headless/Downloads/ShrodingerFlow-unity3d/Assets/Scenes/SF/assets/CUDA_kernels/";
+    
+        private static CudaContext ctx = new CudaContext(0);
 
         public static CudaKernel load_kernel(String kernelName)
         {
-            init_loader();
             byte[] ptx = prepare_kernel(kernelName);
             
             return ctx.LoadKernelPTX(ptx, kernelName);
@@ -31,7 +20,7 @@ namespace source.assets.CUDA_kernels
         
         private static byte[] prepare_kernel(string kernelName)
         {
-            string fileToCompile = File.ReadAllText(basePath + kernelName + ".cu");
+            string fileToCompile = File.ReadAllText(dir + kernelName + ".cu");
             
             CudaRuntimeCompiler rtc = new CudaRuntimeCompiler(fileToCompile, kernelName);
 
