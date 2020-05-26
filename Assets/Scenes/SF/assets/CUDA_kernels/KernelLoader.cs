@@ -7,7 +7,7 @@ namespace source.assets.CUDA_kernels
 {
     public class KernelLoader
     {
-        private static string dir = "/headless/Downloads/ShrodingerFlow-unity3d/Assets/Scenes/SF/assets/CUDA_kernels/";
+        private static string dir = "./Assets/Scenes/SF/assets/CUDA_kernels/";
     
         private static CudaContext ctx = new CudaContext(0);
 

@@ -6,11 +6,11 @@ namespace source
 {
     public class Simulation
     {
-        private readonly float[] JetVelocity = {1, 0, 0};
+        public readonly float[] JetVelocity = {1, 0, 0};
         
-        private float[] nozzle_cen = { (float)(2 - 1.7), (float)(1 - 0.034), (float)(1 + 0.066) }; // nozzle center
-        private float nozzle_len = (float)0.5;                   // nozzle length
-        private float nozzle_rad = (float)0.5 ;                   // nozzle radius
+        public float[] nozzle_cen = { (float)(2 - 1.7), (float)(1 - 0.034), (float)(1 + 0.066) }; // nozzle center
+        public float nozzle_len = (float)0.5;                   // nozzle length
+        public float nozzle_rad = (float)0.5 ;                   // nozzle radius
 
         private bool[,,] isJet;
         private float[] kvec;
