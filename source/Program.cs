@@ -14,11 +14,9 @@ using source;
 
 class TestCase
 {
-    static void Main(string[] args)
+    static void iterate(int[] vol_res, int n_particles)
     {
-        //PARAMETERS
         int[] vol_size = { 10, 5, 5 };      // box size
-        int[] vol_res = { 64, 32, 32 };    // volume resolution
         float hbar = (float)0.1;           // Planck constant
         float dt = 1 / (float)24;          // time step
         int tmax = 85;
@@ -31,8 +29,7 @@ class TestCase
 
         float[] cen1 = {vol_size[0] / 2f, vol_size[1] / 2f, vol_size[2] / 2f}; 
         float[] cen2 = {vol_size[0] / 2f, vol_size[1] / 2f, vol_size[2] / 2f}; 
-
-        int n_particles = 10000;  
+ 
         
         //INITIALISATION
         ISF.Init(vol_size, vol_res, hbar, dt);
@@ -87,11 +84,11 @@ class TestCase
         Velocity vel = new Velocity(ISF.properties.resx, ISF.properties.resy, ISF.properties.resz);
         
         
-        
+        Stopwatch time = new Stopwatch();
+        time.Start();
         //MAIN ITERATION
-        Console.Out.WriteLine("Start");
-        int itermax = (int)Math.Ceiling(tmax / dt);
-        for (int i = 0; i < 100; i++)
+        int itermax = 500;
+        for (int i = 0; i < itermax; i++)
         {
             //incompressible Schroedinger flow
             ISF.update_space();
@@ -102,14 +99,32 @@ class TestCase
             Particles.calculate_movement(vel);
         }
 
-        float[] xx = Particles.x;
-        float[] yy = Particles.y;
-        float[] zz = Particles.z;
-        
-        for (int i = 0; i < 20; i++)
+        time.Stop();
+        TimeSpan ts = time.Elapsed;
+        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            ts.Hours, ts.Minutes, ts.Seconds,
+            ts.Milliseconds / 10);
+        using (System.IO.StreamWriter file =
+            new System.IO.StreamWriter(@"./test.txt", true))
         {
-            Console.Out.WriteLine(xx[i] + " " + yy[i] + " " + zz[i]);
+            file.WriteLine(elapsedTime);
         }
+    }
+
+    static void Main(string[] args)
+    {
+        int res = 16;
+        int num = 1000;
+        for (int i = 0; i < 3; i++)
+        {
+            iterate(new int[] { res, res / 2, res / 2 }, num);
+            iterate(new int[] { res, res / 2, res / 2 }, num * 5);
+            iterate(new int[] { res, res / 2, res / 2 }, num * 10);
+            iterate(new int[] { res, res / 2, res / 2 }, num * 20);
+	    iterate(new int[] { res, res / 2, res / 2 }, num * 50);
+            res *= 2;
+        }
+        
     }
 
 }

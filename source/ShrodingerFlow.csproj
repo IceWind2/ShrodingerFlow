@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>source</RootNamespace>
     <AssemblyName>ShrodingerFlow</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -52,10 +52,10 @@
       <HintPath>bin\Debug\CudaFFT.dll</HintPath>
     </Reference>
     <Reference Include="ManagedCuda, Version=10.0.39.0, Culture=neutral, PublicKeyToken=242d898828717aa0">
-      <HintPath>bin\Release\ManagedCuda.dll</HintPath>
+      <HintPath>..\libs\ManagedCuda.dll</HintPath>
     </Reference>
     <Reference Include="NVRTC, Version=10.0.39.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>bin\Release\NVRTC.dll</HintPath>
+      <HintPath>..\libs\NVRTC.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
