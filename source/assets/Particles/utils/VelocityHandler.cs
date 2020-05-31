@@ -23,7 +23,6 @@ namespace source.assets.Particles.utils
  
             torus_d = new float[3] {ISF.properties.dx, ISF.properties.dy, ISF.properties.dz};
             torus_res = new int[3] {ISF.properties.resx, ISF.properties.resy, ISF.properties.resz};
-            torus_size = new int[3] { ISF.properties.sizex, ISF.properties.sizey, ISF.properties.sizez };
 
             d_k1x = new CudaDeviceVariable<float>(maxCnt);
             d_k1y = new CudaDeviceVariable<float>(maxCnt);
