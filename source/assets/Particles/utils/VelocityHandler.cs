@@ -8,7 +8,7 @@ namespace source.assets.Particles.utils
 {
     public class VelocityHandler : Handler
     {
-        private static CudaDeviceVariable<int> torus_res, torus_size;
+        private static CudaDeviceVariable<int> torus_res;
         private static CudaDeviceVariable<float> torus_d;
         private static float _dt;
         private static CudaDeviceVariable<float> d_k1x, d_k1y, d_k1z, d_k2x, d_k2y, d_k2z, d_k3x, d_k3y, d_k3z, d_k4x, d_k4y, d_k4z;
@@ -20,7 +20,7 @@ namespace source.assets.Particles.utils
             _gpuUpdate = KernelLoader.load_kernel("update_particles");
             
             _dt = ISF.properties.dt;
-
+ 
             torus_d = new float[3] {ISF.properties.dx, ISF.properties.dy, ISF.properties.dz};
             torus_res = new int[3] {ISF.properties.resx, ISF.properties.resy, ISF.properties.resz};
             torus_size = new int[3] { ISF.properties.sizex, ISF.properties.sizey, ISF.properties.sizez };
@@ -46,15 +46,15 @@ namespace source.assets.Particles.utils
         {
             float d_dt = 0;
 
-            _gpuVelocity.BlockDimensions = new dim3(1, 1, 1);
-            _gpuVelocity.GridDimensions = new dim3(cnt, 1, 1);
+            _gpuVelocity.BlockDimensions = new dim3(32, 32, 1);
+            _gpuVelocity.GridDimensions = new dim3((int)Math.Ceiling(Math.Sqrt(cnt / 1024)), (int)Math.Ceiling(Math.Sqrt(cnt / 1024)), 1);
             
             _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
                                               d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
                                               d_dt, 
                                               d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
                                               d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
-                                              torus_size.DevicePointer, torus_res.DevicePointer, torus_d.DevicePointer);
+                                              cnt, torus_res.DevicePointer, torus_d.DevicePointer);
 
             d_dt = _dt * (float)0.5;
             _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
@@ -62,26 +62,26 @@ namespace source.assets.Particles.utils
                                               d_dt, 
                                               d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
                                               d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer, 
-                                              torus_size.DevicePointer, torus_res.DevicePointer, torus_d.DevicePointer);
+                                              cnt, torus_res.DevicePointer, torus_d.DevicePointer);
             
             _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
                                               d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer, 
                                               d_dt, 
                                               d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
                                               d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer, 
-                                              torus_size.DevicePointer, torus_res.DevicePointer, torus_d.DevicePointer);
+                                              cnt, torus_res.DevicePointer, torus_d.DevicePointer);
             
             d_dt = _dt;
             _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
                                               d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer, 
-                                              d_dt, 
+                                                d_dt, 
                                               d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
                                               d_k4x.DevicePointer, d_k4y.DevicePointer, d_k4z.DevicePointer,
-                                              torus_size.DevicePointer, torus_res.DevicePointer, torus_d.DevicePointer);
+                                              cnt, torus_res.DevicePointer, torus_d.DevicePointer);
             
             
-            _gpuUpdate.BlockDimensions = new dim3(1, 1, 1);
-            _gpuUpdate.GridDimensions = new dim3(cnt * 3, 1, 1);
+            _gpuUpdate.BlockDimensions = new dim3(32, 32, 1);
+            _gpuUpdate.GridDimensions = new dim3((int)Math.Ceiling(Math.Sqrt(cnt*3 / 1024)), (int)Math.Ceiling(Math.Sqrt(cnt*3 / 1024)), 1);
             
             _gpuUpdate.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
                                             d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 

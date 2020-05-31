@@ -113,18 +113,20 @@ class TestCase
 
     static void Main(string[] args)
     {
-        int res = 16;
-        int num = 1000;
-        for (int i = 0; i < 3; i++)
+        int res = 32;
+        int num = 10000;
+        for (int i = 0; i < 4; i++)
         {
             iterate(new int[] { res, res / 2, res / 2 }, num);
             iterate(new int[] { res, res / 2, res / 2 }, num * 5);
-            iterate(new int[] { res, res / 2, res / 2 }, num * 10);
-            iterate(new int[] { res, res / 2, res / 2 }, num * 20);
-	    iterate(new int[] { res, res / 2, res / 2 }, num * 50);
+            iterate(new int[] { res, res / 2, res / 2 }, num * 25);
+            iterate(new int[] { res, res / 2, res / 2 }, num * 50);
+            iterate(new int[] { res, res / 2, res / 2 }, num * 75);
+            iterate(new int[] { res, res / 2, res / 2 }, num * 100);
+
             res *= 2;
         }
-        
+
     }
 
 }

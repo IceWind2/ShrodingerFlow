@@ -4,11 +4,14 @@ update_particles(float* x, float* y, float* z,
                  const float* k2x, const float* k2y, const float* k2z,
                  const float* k3x, const float* k3y, const float* k3z,
                  const float* k4x, const float* k4y, const float* k4z,
-                 float dt)
+                 int size, float dt)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    switch (i % 3)
-    {
+    int blockId = blockIdx.x + blockIdx.y * gridDim.x;
+    int i = blockId * (blockDim.x * blockDim.y) + (threadIdx.y * blockDim.x) + threadIdx.x;
+
+    if (i < size) {
+        switch (i % 3)
+        {
         case 0:
             i /= 3;
             x[i] += ((k1x[i] + 2 * k2x[i] + 2 * k3x[i] + k4x[i]) * dt / 6.0);
@@ -21,5 +24,6 @@ update_particles(float* x, float* y, float* z,
             i /= 3;
             z[i] += ((k1z[i] + 2 * k2z[i] + 2 * k3z[i] + k4z[i]) * dt / 6.0);
             break;
+        }
     }
 }
