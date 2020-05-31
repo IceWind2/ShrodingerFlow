@@ -45,48 +45,50 @@ namespace source.assets.Particles.utils
         {
             float d_dt = 0;
 
-            _gpuVelocity.BlockDimensions = new dim3(32, 32, 1);
-            _gpuVelocity.GridDimensions = new dim3((int)Math.Ceiling(Math.Sqrt(cnt / 1024)), (int)Math.Ceiling(Math.Sqrt(cnt / 1024)), 1);
-            
-            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
-                                              d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
-                                              d_dt, 
-                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
-                                              d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
+            int thrd = (int)Math.Pow(2, Math.Ceiling(Math.Log(Math.Sqrt(Math.Sqrt(cnt))) / Math.Log(2)));
+
+            _gpuVelocity.BlockDimensions = new dim3(thrd, thrd, 1);
+            _gpuVelocity.GridDimensions = new dim3((int)Math.Ceiling(Math.Sqrt(cnt / thrd / thrd)), (int)Math.Ceiling(Math.Sqrt(cnt / thrd / thrd)), 1);
+
+            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer,
+                                              d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer,
+                                              d_dt,
+                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer,
+                                              d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer,
                                               cnt, torus_res.DevicePointer, torus_d.DevicePointer);
 
             d_dt = _dt * (float)0.5;
-            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
-                                              d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
-                                              d_dt, 
-                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
-                                              d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer, 
+            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer,
+                                              d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer,
+                                              d_dt,
+                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer,
+                                              d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer,
                                               cnt, torus_res.DevicePointer, torus_d.DevicePointer);
-            
-            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
-                                              d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer, 
-                                              d_dt, 
-                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
-                                              d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer, 
+
+            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer,
+                                              d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer,
+                                              d_dt,
+                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer,
+                                              d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer,
                                               cnt, torus_res.DevicePointer, torus_d.DevicePointer);
-            
+
             d_dt = _dt;
-            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
-                                              d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer, 
-                                                d_dt, 
-                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer, 
+            _gpuVelocity.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer,
+                                              d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer,
+                                              d_dt,
+                                              d_vx.DevicePointer, d_vy.DevicePointer, d_vz.DevicePointer,
                                               d_k4x.DevicePointer, d_k4y.DevicePointer, d_k4z.DevicePointer,
                                               cnt, torus_res.DevicePointer, torus_d.DevicePointer);
-            
-            
-            _gpuUpdate.BlockDimensions = new dim3(32, 32, 1);
-            _gpuUpdate.GridDimensions = new dim3((int)Math.Ceiling(Math.Sqrt(cnt*3 / 1024)), (int)Math.Ceiling(Math.Sqrt(cnt*3 / 1024)), 1);
-            
-            _gpuUpdate.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer, 
-                                            d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer, 
-                                            d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer, 
-                                            d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer, 
-                                            d_k4x.DevicePointer, d_k4y.DevicePointer, d_k4z.DevicePointer, 
+
+
+            _gpuUpdate.BlockDimensions = new dim3(thrd, thrd, 1);
+            _gpuUpdate.GridDimensions = new dim3((int)Math.Ceiling(Math.Sqrt(cnt / thrd / thrd)) * 3, (int)Math.Ceiling(Math.Sqrt(cnt / thrd / thrd)), 1);
+
+            _gpuUpdate.Run(x.DevicePointer, y.DevicePointer, z.DevicePointer,
+                                            d_k1x.DevicePointer, d_k1y.DevicePointer, d_k1z.DevicePointer,
+                                            d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer,
+                                            d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer,
+                                            d_k4x.DevicePointer, d_k4y.DevicePointer, d_k4z.DevicePointer,
                                             cnt, d_dt);
         }
     }
