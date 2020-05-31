@@ -87,7 +87,7 @@ namespace source.assets.Particles.utils
                                             d_k2x.DevicePointer, d_k2y.DevicePointer, d_k2z.DevicePointer, 
                                             d_k3x.DevicePointer, d_k3y.DevicePointer, d_k3z.DevicePointer, 
                                             d_k4x.DevicePointer, d_k4y.DevicePointer, d_k4z.DevicePointer, 
-                                            d_dt);
+                                            cnt, d_dt);
         }
     }
 }
