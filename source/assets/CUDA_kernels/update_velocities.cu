@@ -3,12 +3,12 @@ update_velocities(float* x, float* y, float* z,
                   float* shiftX, float* shiftY, float* shiftZ, float fact, 
                   float* vx, float* vy, float* vz, 
                   float* _ux, float* _uy, float* _uz, 
-                  int size, int* tor_res, float* tor_d)
+                   int size, int* tor_size, int* tor_res, float* tor_d)
         {
             int blockId = blockIdx.x+ blockIdx.y * gridDim.x;
             int i = blockId * (blockDim.x * blockDim.y)+ (threadIdx.y * blockDim.x)+ threadIdx.x;
 
-            if (i < size) {
+            if (i < size && x[i] > 0 && x[i] < tor_size[0] && y[i] > 0 && y[i] < tor_size[1] && z[i] > 0 && z[i] < tor_size[2]) {
                 float sh_x = shiftX[i] * fact;
                 float tmp_x = (x[i] + sh_x);
                 int ix = floor(tmp_x / tor_d[0]);
