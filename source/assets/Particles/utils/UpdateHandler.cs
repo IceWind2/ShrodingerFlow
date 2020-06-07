@@ -13,9 +13,7 @@ namespace source.assets.Particles.utils
         {
             _gpu = KernelLoader.load_kernel("add_particles");
         }
-        
-        
-
+       
         public static void update_particles(float[] xx, float[] yy, float[] zz, int cnt, int size)
         {
             CudaDeviceVariable<float> d_xx = xx;

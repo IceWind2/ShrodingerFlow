@@ -69,25 +69,34 @@ class TestCase
 
         ISF.Normalize();
         ISF.PressureProject();
-        
+
         //init particles
+        Velocity vel = new Velocity(ISF.properties.resx, ISF.properties.resy, ISF.properties.resz);
+
         var x = new float[n_particles];
         var y = new float[n_particles];
         var z = new float[n_particles];
         Random rnd = new Random();
-        for (int i = 0; i < n_particles; i++)
+        
+        
+        for (int i = 0; i < n_particles/2; i++)
         {
-            y[i] = (float)(rnd.NextDouble() * 4 + 0.5);
-            z[i] = (float)(rnd.NextDouble() * 4 + 0.5);
-            x[i] = 5;
+            y[i] = (float)(rnd.NextDouble() * 2 + 0.5);
+            z[i] = (float)(rnd.NextDouble() * 2 + 0.5);
+            x[i] = 2;
         }
+
+        Particles.add_particles(x, y, z, new float[n_particles / 2], new float[n_particles / 2], new float[n_particles / 2]);
         
-        Particles.add_particles(x, y, z, n_particles);
-        
-        Velocity vel = new Velocity(ISF.properties.resx, ISF.properties.resy, ISF.properties.resz);
-        
-        
-        
+        for (int i = 0; i < n_particles / 2; i++)
+        {
+            y[i] = (float)(rnd.NextDouble() * 2 + 0.5);
+            z[i] = (float)(rnd.NextDouble() * 2 + 0.5);
+            x[i] = 8;
+        }
+
+        Particles.add_particles(x, y, z, new float[n_particles / 2], new float[n_particles / 2], new float[n_particles / 2]);
+
         //MAIN ITERATION
         Console.Out.WriteLine("Start");
         int itermax = (int)Math.Ceiling(tmax / dt);
